@@ -1,0 +1,51 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: "testes"
+        run: dotnet test testes/PosicoesDeGo.Testes/PosicoesDeGo.Testes.csproj -c Release --nologo -v q --filter "Category!=Pesado"
+
+      - name: "posicoes legais ate 7x7"
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- tabela
+
+      - name: "todos os retangulos ate 7 colunas"
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- retangulos
+
+      - name: "forca bruta contra a fronteira"
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- juiz
+
+      - name: "quantos estados a fronteira carrega"
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- fronteira
+
+  pesado:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: "8x8, 9x9 e o juiz no 4x5"
+        run: dotnet test testes/PosicoesDeGo.Testes/PosicoesDeGo.Testes.csproj -c Release --nologo -v q --filter "Category=Pesado"
